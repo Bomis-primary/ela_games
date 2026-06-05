@@ -3,78 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Subject-Verb Detective</title>
+<title>Subject-Verb Agreement Maze</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:Arial,sans-serif;background:#141e30;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;}
-.splash-screen{position:fixed;inset:0;background:#fff;display:flex;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.5s;}
-.splash-screen.hidden{opacity:0;pointer-events:none;}
-.splash-screen img{max-width:480px;width:90%;height:auto;animation:logoFloat 2s ease-in-out infinite;}
-@keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-.container{max-width:1000px;width:100%;background:#0b1020;border-radius:20px;border:3px solid #ffd700;overflow:hidden;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;}
-.container.visible{opacity:1;}
-.header{padding:20px;text-align:center;background:linear-gradient(135deg,#ffd700,#ff9f1c);color:#1a1a2e;}
-.header h1{font-size:28px;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
-.stage-indicator{margin-top:5px;display:inline-block;padding:6px 16px;border-radius:20px;background:rgba(26,26,46,0.9);border:2px solid #ffd700;color:#ffd700;font-weight:bold;font-size:14px;}
-.game-wrapper{display:flex;flex-direction:row;gap:20px;padding:20px;}
-.left-panel{flex:1;background:#1e293b;border-radius:12px;padding:20px;min-width:350px;}
-.right-panel{flex:1;background:#1f2937;border-radius:12px;padding:20px;min-width:350px;display:flex;flex-direction:column;}
-.scenario-title{font-weight:bold;font-size:16px;color:#facc15;margin-bottom:10px;}
-.scenario-text{font-size:15px;color:#e5e7eb;}
-.options{margin-top:10px;display:flex;flex-direction:column;gap:10px;}
-.option-btn{border-radius:6px;border:1px solid #94a3b8;background:#0f172a;color:#e5e7eb;padding:10px;cursor:pointer;transition:all 0.2s;}
-.option-btn:hover{background:#1e293b;}
-.option-btn.correct{background:#16a34a;color:#ecfdf5;border-color:#4ade80;}
-.option-btn.wrong{background:#b91c1c;color:#fee2e2;border-color:#f87171;}
-.option-btn.disabled{pointer-events:none;opacity:0.7;}
-.feedback{margin-top:6px;font-size:13px;padding:6px;border-radius:6px;display:none;}
-.feedback.correct{background:rgba(22,163,74,0.2);border:1px solid #4ade80;color:#bbf7d0;}
-.feedback.wrong{background:rgba(185,28,28,0.2);border:1px solid #fca5a5;color:#fecaca;}
-.btn-next{padding:8px 16px;border-radius:16px;background:#facc15;border:none;color:#111827;display:none;cursor:pointer;margin-top:10px;}
-.btn-next:hover{background:#eab308;}
-.timer{font-size:14px;color:#facc15;font-weight:bold;margin-top:5px;}
-.score-panel{margin-top:10px;font-size:14px;color:#e5e7eb;}
-.final-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:999;}
-.final-title{font-size:28px;color:#facc15;margin-bottom:12px;}
-.final-score{font-size:22px;margin-bottom:8px;}
-.final-rank{font-size:20px;font-weight:bold;margin-bottom:12px;}
-.btn-playagain{padding:10px 20px;background:#16a34a;border:none;color:#ecfdf5;border-radius:16px;cursor:pointer;}
-.btn-playagain:hover{background:#22c55e;}
+/* Keep all original styles from Motivation Maze Runner */
+body{margin:0;padding:0;font-family:Arial,sans-serif;background:#141e30;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
+#splashScreen{position:fixed;inset:0;background:#fff;display:flex;justify-content:center;align-items:center;z-index:9999;}
+#splashScreen img{width:300px;height:auto;}
+#gameContainer{display:none;width:90%;max-width:1000px;}
+.maze{position:relative;background:#0b1020;width:100%;height:400px;margin-bottom:20px;border-radius:12px;overflow:hidden;}
+#player{position:absolute;width:40px;height:40px;background:#facc15;border-radius:50%;top:0;left:0;}
+.star{position:absolute;width:30px;height:30px;background:#16a34a;border-radius:50%;}
+#questionModal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;padding:20px;border-radius:12px;border:2px solid #ffd700;max-width:400px;width:90%;z-index:1000;}
+#questionText{margin-bottom:10px;}
+.option-btn{display:block;width:100%;margin:5px 0;padding:10px;border-radius:8px;border:1px solid #94a3b8;background:#0f172a;color:#fff;cursor:pointer;}
+.option-btn.correct{background:#16a34a;color:#fff;border-color:#4ade80;}
+.option-btn.wrong{background:#b91c1c;color:#fff;border-color:#f87171;}
+#feedback{margin-top:5px;font-weight:bold;}
+#scorePanel{margin-top:10px;font-size:16px;}
+#finalScreen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:999;}
+#finalScreen h2{margin-bottom:10px;}
+#playAgainBtn{padding:10px 20px;background:#16a34a;border:none;color:#fff;border-radius:12px;cursor:pointer;}
+#playAgainBtn:hover{background:#22c55e;}
 </style>
 </head>
 <body>
 
-<div class="splash-screen" id="splashScreen">
+<div id="splashScreen">
 <img src="assets/logo.png" alt="Logo">
 </div>
 
-<div class="container" id="mainContainer">
-<div class="header">
-<h1>🕵️ Subject-Verb Detective</h1>
-<div class="stage-indicator" id="stageIndicator">Case 1 of 15</div>
+<div id="gameContainer">
+<div class="maze" id="maze">
+<div id="player"></div>
 </div>
 
-<div class="game-wrapper">
-<div class="left-panel">
-<div class="scenario-title">Sentence:</div>
-<div class="scenario-text" id="scenarioText"></div>
-<div class="timer" id="timerText">Time Left: 60s</div>
+<div id="questionModal">
+<div id="questionText"></div>
+<div id="optionsContainer"></div>
+<div id="feedback"></div>
 </div>
 
-<div class="right-panel">
-<div class="options" id="optionsContainer"></div>
-<div class="feedback" id="feedback"></div>
-<button class="btn-next" id="nextBtn">Next Case →</button>
-<div class="score-panel" id="scorePanel">Score: 0 / 0</div>
-</div>
-</div>
+<div id="scorePanel">Score: 0 / 0</div>
 </div>
 
-<div class="final-screen" id="finalScreen">
-<div class="final-title">🏆 Game Complete!</div>
-<div class="final-score" id="finalScore"></div>
-<div class="final-rank" id="finalRank"></div>
-<button class="btn-playagain" id="playAgainBtn">Play Again</button>
+<div id="finalScreen">
+<h2>Game Complete!</h2>
+<div id="finalScore"></div>
+<div id="finalRank"></div>
+<button id="playAgainBtn">Play Again</button>
 </div>
 
 <script>
@@ -83,7 +59,14 @@ const correctSound = new Audio('assets/correct.mp3');
 const wrongSound = new Audio('assets/wrong.mp3');
 const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
 
-// 15 Subject-Verb Agreement questions
+// Player and maze
+const player = document.getElementById('player');
+const maze = document.getElementById('maze');
+const mazeWidth = maze.offsetWidth - 40;
+const mazeHeight = maze.offsetHeight - 40;
+let playerPos = {x:0,y:0};
+
+// Subject-Verb Agreement Questions (15)
 const questionBank = [
 {scenario:"He ___ (go) to school every day.",options:["go","goes","went","will go"],correct:1},
 {scenario:"They ___ (play) football on weekends.",options:["plays","play","played","will play"],correct:1},
@@ -102,83 +85,82 @@ const questionBank = [
 {scenario:"Next week, they ___ (start) a new project.",options:["start","starts","started","will start"],correct:3}
 ];
 
-let currentCase = 0, score = 0, timer, timeLeft = 60;
+let currentQuestion = 0;
+let score = 0;
 
-// Splash screen
+// Hide splash screen and show game
 setTimeout(()=>{
-document.getElementById('splashScreen').classList.add('hidden');
-document.getElementById('mainContainer').classList.add('visible');
-loadCase();
+document.getElementById('splashScreen').style.display='none';
+document.getElementById('gameContainer').style.display='block';
+placeStar();
 },3000);
 
-function loadCase(){
-const q = questionBank[currentCase];
-document.getElementById('scenarioText').textContent = q.scenario;
+// Maze star placement and question trigger
+function placeStar(){
+const star = document.createElement('div');
+star.className='star';
+star.style.left = Math.floor(Math.random()*mazeWidth)+'px';
+star.style.top = Math.floor(Math.random()*mazeHeight)+'px';
+maze.appendChild(star);
+
+star.addEventListener('click',()=>{
+maze.removeChild(star);
+showQuestion();
+});
+}
+
+// Show question modal
+function showQuestion(){
+const modal = document.getElementById('questionModal');
+const q = questionBank[currentQuestion];
+document.getElementById('questionText').textContent = q.scenario;
 const container = document.getElementById('optionsContainer');
-container.innerHTML = '';
-document.getElementById('feedback').style.display='none';
+container.innerHTML='';
+document.getElementById('feedback').textContent='';
+modal.style.display='block';
+
 q.options.forEach((opt,i)=>{
-  const btn=document.createElement('button');
+  const btn = document.createElement('button');
   btn.className='option-btn';
-  btn.textContent=opt;
-  btn.onclick=()=>selectOption(i);
+  btn.textContent = opt;
+  btn.onclick = () => checkAnswer(i);
   container.appendChild(btn);
 });
-document.getElementById('nextBtn').style.display='none';
-document.getElementById('stageIndicator').textContent=`Case ${currentCase+1} of 15`;
-document.getElementById('scorePanel').textContent=`Score: ${score} / ${currentCase}`;
-timeLeft=60;
-document.getElementById('timerText').textContent=`Time Left: ${timeLeft}s`;
-clearInterval(timer);
-timer=setInterval(()=>{
-  timeLeft--;
-  document.getElementById('timerText').textContent=`Time Left: ${timeLeft}s`;
-  if(timeLeft<=0){clearInterval(timer);autoNext();}
-},1000);
 }
 
-function selectOption(idx){
-clearInterval(timer);
-const q=questionBank[currentCase];
-const buttons=document.querySelectorAll('.option-btn');
+// Check answer
+function checkAnswer(idx){
+const q = questionBank[currentQuestion];
+const buttons = document.querySelectorAll('.option-btn');
 buttons.forEach(b=>b.disabled=true);
+
 if(idx===q.correct){
-  buttons[idx].classList.add('correct');
-  document.getElementById('feedback').textContent='Correct!';
-  document.getElementById('feedback').className='feedback correct';
-  correctSound.play();
-  score++;
+buttons[idx].classList.add('correct');
+document.getElementById('feedback').textContent='Correct!';
+score++;
+correctSound.play();
 }else{
-  buttons[idx].classList.add('wrong');
-  document.getElementById('feedback').textContent='Wrong!';
-  document.getElementById('feedback').className='feedback wrong';
-  wrongSound.play();
-}
-document.getElementById('feedback').style.display='block';
-document.getElementById('nextBtn').style.display='inline-block';
-document.getElementById('nextBtn').onclick=nextCase;
+buttons[idx].classList.add('wrong');
+document.getElementById('feedback').textContent='Wrong!';
+wrongSound.play();
 }
 
-function autoNext(){
-document.getElementById('feedback').textContent='Time up!';
-document.getElementById('feedback').className='feedback wrong';
-document.getElementById('feedback').style.display='block';
-document.getElementById('nextBtn').style.display='inline-block';
-document.getElementById('nextBtn').onclick=nextCase;
-}
-
-function nextCase(){
-currentCase++;
-if(currentCase<questionBank.length){
-loadCase();
-}else{
+// Next question after 1.2 sec
+setTimeout(()=>{
+currentQuestion++;
+if(currentQuestion>=questionBank.length){
 endGame();
+}else{
+document.getElementById('questionModal').style.display='none';
+placeStar();
 }
+},1200);
 }
 
+// End game
 function endGame(){
-document.getElementById('mainContainer').style.display='none';
-const final=document.getElementById('finalScreen');
+document.getElementById('gameContainer').style.display='none';
+document.getElementById('finalScreen').style.display='flex';
 document.getElementById('finalScore').textContent=`You scored ${score} / ${questionBank.length}`;
 let rank='';
 if(score>=13) rank='Master Detective';
@@ -187,9 +169,9 @@ else if(score>=6) rank='Novice Detective';
 else rank='Apprentice';
 document.getElementById('finalRank').textContent=rank;
 celebrationSound.play();
-final.style.display='flex';
-document.getElementById('playAgainBtn').onclick=()=>{location.reload();}
 }
+
+document.getElementById('playAgainBtn').onclick=()=>{location.reload();}
 </script>
 </body>
 </html>

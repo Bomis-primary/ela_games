@@ -1,1 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject-Verb Detective</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;background:#141e30;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+.splash-screen{position:fixed;inset:0;background:#fff;display:flex;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.5s;}
+.splash-screen.hidden{opacity:0;pointer-events:none;}
+.splash-screen img{max-width:480px;width:90%;height:auto;animation:logoFloat 2s ease-in-out infinite;}
+@keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.container{max-width:1000px;width:100%;background:#0b1020;border-radius:20px;border:3px solid #ffd700;overflow:hidden;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;}
+.container.visible{opacity:1;}
+.header{padding:20px;text-align:center;background:linear-gradient(135deg,#ffd700,#ff9f1c);color:#1a1a2e;}
+.header h1{font-size:28px;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
+.stage-indicator{margin-top:5px;display:inline-block;padding:6px 16px;border-radius:20px;background:rgba(26,26,46,0.9);border:2px solid #ffd700;color:#ffd700;font-weight:bold;font-size:14px;}
+.game-wrapper{display:flex;flex-direction:row;gap:20px;padding:20px;}
+.left-panel{flex:1;background:#1e293b;border-radius:12px;padding:20px;min-width:350px;}
+.right-panel{flex:1;background:#1f2937;border-radius:12px;padding:20px;min-width:350px;display:flex;flex-direction:column;}
+.scenario-title{font-weight:bold;font-size:16px;color:#facc15;margin-bottom:10px;}
+.scenario-text{font-size:15px;color:#e5e7eb;}
+.options{margin-top:10px;display:flex;flex-direction:column;gap:10px;}
+.option-btn{border-radius:6px;border:1px solid #94a3b8;background:#0f172a;color:#e5e7eb;padding:10px;cursor:pointer;transition:all 0.2s;}
+.option-btn:hover{background:#1e293b;}
+.option-btn.correct{background:#16a34a;color:#ecfdf5;border-color:#4ade80;}
+.option-btn.wrong{background:#b91c1c;color:#fee2e2;border-color:#f87171;}
+.option-btn.disabled{pointer-events:none;opacity:0.7;}
+.feedback{margin-top:6px;font-size:13px;padding:6px;border-radius:6px;display:none;}
+.feedback.correct{background:rgba(22,163,74,0.2);border:1px solid #4ade80;color:#bbf7d0;}
+.feedback.wrong{background:rgba(185,28,28,0.2);border:1px solid #fca5a5;color:#fecaca;}
+.btn-next{padding:8px 16px;border-radius:16px;background:#facc15;border:none;color:#111827;display:none;cursor:pointer;margin-top:10px;}
+.btn-next:hover{background:#eab308;}
+.timer{font-size:14px;color:#facc15;font-weight:bold;margin-top:5px;}
+.score-panel{margin-top:10px;font-size:14px;color:#e5e7eb;}
+.final-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:999;}
+.final-title{font-size:28px;color:#facc15;margin-bottom:12px;}
+.final-score{font-size:22px;margin-bottom:8px;}
+.final-rank{font-size:20px;font-weight:bold;margin-bottom:12px;}
+.btn-playagain{padding:10px 20px;background:#16a34a;border:none;color:#ecfdf5;border-radius:16px;cursor:pointer;}
+.btn-playagain:hover{background:#22c55e;}
+</style>
+</head>
+<body>
 
+<div class="splash-screen" id="splashScreen">
+<img src="assets/logo.png" alt="Logo">
+</div>
+
+<div class="container" id="mainContainer">
+<div class="header">
+<h1>🕵️ Subject-Verb Detective</h1>
+<div class="stage-indicator" id="stageIndicator">Case 1 of 15</div>
+</div>
+
+<div class="game-wrapper">
+<div class="left-panel">
+<div class="scenario-title">Sentence:</div>
+<div class="scenario-text" id="scenarioText"></div>
+<div class="timer" id="timerText">Time Left: 60s</div>
+</div>
+
+<div class="right-panel">
+<div class="options" id="optionsContainer"></div>
+<div class="feedback" id="feedback"></div>
+<button class="btn-next" id="nextBtn">Next Case →</button>
+<div class="score-panel" id="scorePanel">Score: 0 / 0</div>
+</div>
+</div>
+</div>
+
+<div class="final-screen" id="finalScreen">
+<div class="final-title">🏆 Game Complete!</div>
+<div class="final-score" id="finalScore"></div>
+<div class="final-rank" id="finalRank"></div>
+<button class="btn-playagain" id="playAgainBtn">Play Again</button>
+</div>
+
+<script>
+// Audio
+const correctSound = new Audio('assets/correct.mp3');
+const wrongSound = new Audio('assets/wrong.mp3');
+const celebrationSound = new Audio('assets/freesound_community-claps-44774.mp3');
+
+// 15 Subject-Verb Agreement questions
+const questionBank = [
+{scenario:"He ___ (go) to school every day.",options:["go","goes","went","will go"],correct:1},
+{scenario:"They ___ (play) football on weekends.",options:["plays","play","played","will play"],correct:1},
+{scenario:"She ___ (have) a lot of homework.",options:["have","has","had","will have"],correct:1},
+{scenario:"The cat ___ (sleep) on the sofa.",options:["sleep","sleeps","slept","will sleep"],correct:1},
+{scenario:"We ___ (study) for the test yesterday.",options:["study","studies","studied","will study"],correct:2},
+{scenario:"The children ___ (be) happy.",options:["is","are","was","will be"],correct:1},
+{scenario:"He ___ (watch) TV every evening.",options:["watch","watches","watched","will watch"],correct:1},
+{scenario:"The dogs ___ (bark) loudly.",options:["bark","barks","barked","will bark"],correct:0},
+{scenario:"She and her brother ___ (go) to the park.",options:["go","goes","went","will go"],correct:0},
+{scenario:"The teacher ___ (explain) the lesson clearly.",options:["explain","explains","explained","will explain"],correct:1},
+{scenario:"Each student ___ (have) a notebook.",options:["have","has","had","will have"],correct:1},
+{scenario:"Neither John nor Peter ___ (like) vegetables.",options:["like","likes","liked","will like"],correct:1},
+{scenario:"The team ___ (win) the match yesterday.",options:["win","wins","won","will win"],correct:2},
+{scenario:"I ___ (write) a letter to my friend last week.",options:["write","writes","wrote","will write"],correct:2},
+{scenario:"Next week, they ___ (start) a new project.",options:["start","starts","started","will start"],correct:3}
+];
+
+let currentCase = 0, score = 0, timer, timeLeft = 60;
+
+// Splash screen
+setTimeout(()=>{
+document.getElementById('splashScreen').classList.add('hidden');
+document.getElementById('mainContainer').classList.add('visible');
+loadCase();
+},3000);
+
+function loadCase(){
+const q = questionBank[currentCase];
+document.getElementById('scenarioText').textContent = q.scenario;
+const container = document.getElementById('optionsContainer');
+container.innerHTML = '';
+document.getElementById('feedback').style.display='none';
+q.options.forEach((opt,i)=>{
+  const btn=document.createElement('button');
+  btn.className='option-btn';
+  btn.textContent=opt;
+  btn.onclick=()=>selectOption(i);
+  container.appendChild(btn);
+});
+document.getElementById('nextBtn').style.display='none';
+document.getElementById('stageIndicator').textContent=`Case ${currentCase+1} of 15`;
+document.getElementById('scorePanel').textContent=`Score: ${score} / ${currentCase}`;
+timeLeft=60;
+document.getElementById('timerText').textContent=`Time Left: ${timeLeft}s`;
+clearInterval(timer);
+timer=setInterval(()=>{
+  timeLeft--;
+  document.getElementById('timerText').textContent=`Time Left: ${timeLeft}s`;
+  if(timeLeft<=0){clearInterval(timer);autoNext();}
+},1000);
+}
+
+function selectOption(idx){
+clearInterval(timer);
+const q=questionBank[currentCase];
+const buttons=document.querySelectorAll('.option-btn');
+buttons.forEach(b=>b.disabled=true);
+if(idx===q.correct){
+  buttons[idx].classList.add('correct');
+  document.getElementById('feedback').textContent='Correct!';
+  document.getElementById('feedback').className='feedback correct';
+  correctSound.play();
+  score++;
+}else{
+  buttons[idx].classList.add('wrong');
+  document.getElementById('feedback').textContent='Wrong!';
+  document.getElementById('feedback').className='feedback wrong';
+  wrongSound.play();
+}
+document.getElementById('feedback').style.display='block';
+document.getElementById('nextBtn').style.display='inline-block';
+document.getElementById('nextBtn').onclick=nextCase;
+}
+
+function autoNext(){
+document.getElementById('feedback').textContent='Time up!';
+document.getElementById('feedback').className='feedback wrong';
+document.getElementById('feedback').style.display='block';
+document.getElementById('nextBtn').style.display='inline-block';
+document.getElementById('nextBtn').onclick=nextCase;
+}
+
+function nextCase(){
+currentCase++;
+if(currentCase<questionBank.length){
+loadCase();
+}else{
+endGame();
+}
+}
+
+function endGame(){
+document.getElementById('mainContainer').style.display='none';
+const final=document.getElementById('finalScreen');
+document.getElementById('finalScore').textContent=`You scored ${score} / ${questionBank.length}`;
+let rank='';
+if(score>=13) rank='Master Detective';
+else if(score>=10) rank='Skilled Investigator';
+else if(score>=6) rank='Novice Detective';
+else rank='Apprentice';
+document.getElementById('finalRank').textContent=rank;
+celebrationSound.play();
+final.style.display='flex';
+document.getElementById('playAgainBtn').onclick=()=>{location.reload();}
+}
+</script>
+</body>
+</html>

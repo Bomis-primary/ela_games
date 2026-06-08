@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhyming Words Game</title>
+<style>
+body {
+    margin: 0; padding: 0; font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #f3e5f5, #fce4ec);
+    display: flex; justify-content: center; align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+}
+#logo-screen {
+    display: flex; justify-content: center; align-items: center;
+    width: 100%; height: 100vh;
+    background-color: white;
+    position: absolute; top: 0; left: 0; z-index: 10;
+}
+#game-container {
+    display: none; flex-direction: column; align-items: center;
+    max-width: 600px; width: 95%;
+}
+h2 {
+    text-align: center; margin: 10px 0;
+}
+#grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-top: 20px;
+}
+.tile {
+    background: linear-gradient(135deg, #e1bee7, #f8bbd0);
+    color: #4a148c;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s, background-color 0.2s;
+}
+.tile.correct {
+    background-color: #f48fb1; color: white;
+}
+.tile.greyed {
+    background-color: #bdbdbd; color: #757575;
+    cursor: default;
+}
+#score-popup {
+    display: none;
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff; padding: 20px 40px;
+    border-radius: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+    z-index: 20;
+}
+#restart-btn {
+    margin-top: 20px; padding: 10px 20px; border: none;
+    background-color: #ce93d8; color: white; font-size: 1rem;
+    border-radius: 8px; cursor: pointer;
+}
+@media(max-width:500px){
+    .tile { padding: 15px; font-size:1rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="logo-screen">
+    <img src="assets/innovine-logo 1.png" alt="Logo" style="max-width: 200px;">
+</div>
+
+<div id="game-container">
+    <h2>Click on the words that rhyme.</h2>
+    <div id="grid"></div>
+</div>
+
+<div id="score-popup">
+    <h2 id="score-text"></h2>
+    <button id="restart-btn">Restart</button>
+</div>
+
+<audio id="correct-sound" src="correct.mp3" volume="1"></audio>
+<audio id="wrong-sound" src="wrong.mp3" volume="1"></audio>
+
+<script>
+// Word sets
+const words = [
+    "cat","hat","dog","log","pen","hen","sun","run",
+    "pig","dig","fish","dish","tree","bee","clap","tap",
+    "bat","mat","fun","bun","frog","jog","jump","bump",
+    "happy","sappy","funny","bunny","clapping","tapping","rapping","napping"
+];
+
+let currentWords = words.slice(0,16).sort(() => Math.random()-0.5);
+const pairs = [
+    ["cat","hat"],["dog","log"],["pen","hen"],["sun","run"],
+    ["pig","dig"],["fish","dish"],["tree","bee"],["clap","tap"],
+    ["bat","mat"],["fun","bun"],["frog","jog"],["jump","bump"],
+    ["happy","sappy"],["funny","bunny"],["clapping","tapping"],["rapping","napping"]
+];
+
+let firstTile = null;
+let secondTile = null;
+let attempts = 0;
+let matches = 0;
+let greyedWords = {};
+
+function playSound(id){
+    const audio = document.getElementById(id);
+    audio.currentTime=0;
+    audio.volume=1; // max volume
+    audio.play();
+}
+
+function createGrid(){
+    const grid = document.getElementById("grid");
+    grid.innerHTML="";
+    currentWords.forEach(word=>{
+        const div = document.createElement("div");
+        div.className="tile";
+        div.textContent=word;
+        div.addEventListener("click", ()=>tileClick(div));
+        grid.appendChild(div);
+    });
+}
+
+function tileClick(tile){
+    if(tile.classList.contains("correct") || tile.classList.contains("greyed")) return;
+    if(!firstTile){
+        firstTile = tile;
+        tile.style.transform="scale(1.1)";
+        return;
+    }
+    if(tile===firstTile) return;
+    secondTile = tile;
+    tile.style.transform="scale(1.1)";
+    checkMatch();
+}
+
+function checkMatch(){
+    let w1=firstTile.textContent, w2=secondTile.textContent;
+    let isPair = pairs.some(pair => pair.includes(w1) && pair.includes(w2) && w1!==w2);
+    if(isPair){
+        firstTile.classList.add("correct");
+        secondTile.classList.add("correct");
+        firstTile.style.transform="scale(1)";
+        secondTile.style.transform="scale(1)";
+        matches++;
+        playSound("correct-sound");
+        confettiEffect(firstTile);
+        firstTile = null;
+        secondTile = null;
+        if(matches===currentWords.length/2){
+            setTimeout(showScore,500);
+        }
+    } else {
+        playSound("wrong-sound");
+        attempts++;
+        setTimeout(()=>{
+            if(attempts>=2){
+                // grey only the first tile and its correct rhyming pair
+                let correctPair = pairs.find(pair => pair.includes(firstTile.textContent));
+                if(correctPair){
+                    correctPair.forEach(word=>{
+                        if(!greyedWords[word]){
+                            const tiles = Array.from(document.getElementsByClassName("tile"));
+                            tiles.forEach(t=>{
+                                if(t.textContent===word){
+                                    t.classList.add("greyed");
+                                }
+                            });
+                            greyedWords[word]=true;
+                        }
+                    });
+                }
+                attempts=0;
+            }
+            firstTile.style.transform="scale(1)";
+            secondTile.style.transform="scale(1)";
+            firstTile = null;
+            secondTile = null;
+        },800);
+    }
+}
+
+// Simple confetti animation
+function confettiEffect(tile){
+    for(let i=0;i<20;i++){
+        const confetti = document.createElement("div");
+        confetti.style.position="absolute";
+        confetti.style.width="10px";
+        confetti.style.height="10px";
+        confetti.style.backgroundColor=["#f8bbd0","#e1bee7","#ce93d8","#f3e5f5"][Math.floor(Math.random()*4)];
+        confetti.style.borderRadius="50%";
+        const rect = tile.getBoundingClientRect();
+        confetti.style.left=rect.left + rect.width/2 + "px";
+        confetti.style.top=rect.top + rect.height/2 + "px";
+        document.body.appendChild(confetti);
+        let angle=Math.random()*2*Math.PI;
+        let distance=0;
+        const interval = setInterval(()=>{
+            distance+=5;
+            confetti.style.left=rect.left + rect.width/2 + Math.cos(angle)*distance + "px";
+            confetti.style.top=rect.top + rect.height/2 + Math.sin(angle)*distance + "px";
+            if(distance>100){ clearInterval(interval); confetti.remove();}
+        },20);
+    }
+}
+
+function showScore(){
+    const popup = document.getElementById("score-popup");
+    const scoreText = document.getElementById("score-text");
+    const correct = matches;
+    if(correct<=4) scoreText.textContent="Let's revisit the topic and come back.";
+    else if(correct<=8) scoreText.textContent="Well Done";
+    else if(correct<=12) scoreText.textContent="Good Job";
+    else scoreText.textContent="Excellent Work";
+    popup.style.display="block";
+}
+
+document.getElementById("restart-btn").addEventListener("click", ()=>{
+    location.reload();
+});
+
+window.onload = ()=>{
+    setTimeout(()=>{
+        document.getElementById("logo-screen").style.display="none";
+        document.getElementById("game-container").style.display="flex";
+        createGrid();
+    },5000);
+};
+</script>
+</body>
+</html>

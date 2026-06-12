@@ -2,176 +2,406 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Common vs Proper Nouns Game</title>
+
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(to bottom,#ffe066,#ff6b6b);
-  overflow: hidden;
-  color: #222;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #fff3b0, #ffb347, #ff7b7b);
+  min-height: 100vh;
   text-align: center;
+  color: #222;
+  overflow-x: hidden;
 }
+
 #splash {
   position: fixed;
-  top:0;left:0;width:100%;height:100%;
-  background: white url('innovinelogo.png') center/contain no-repeat;
+  inset: 0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
-#game { display:none; padding: 10px; max-width: 800px; margin:auto; }
-#card { background:white; padding:20px; border-radius:15px; margin:20px auto; max-width:300px; }
-#card img { width:150px; height:150px; margin-bottom:10px; border-radius:10px; object-fit:cover; }
-button { padding:10px 20px; margin:5px; font-size:16px; border-radius:10px; cursor:pointer; }
-#feedback { font-size:20px; min-height:30px; margin-top:10px; }
-#score { font-size:22px; margin-top:10px; }
-#restart { display:none; padding:10px 20px; font-size:18px; border-radius:10px; cursor:pointer; margin-top:15px;}
-.star {
-  position: absolute;
-  width:2px; height:2px; background:white; border-radius:50%;
-  animation: twinkle 3s linear infinite, float 10s linear infinite;
+
+#splash img {
+  max-width: 70%;
+  max-height: 70%;
+  object-fit: contain;
 }
-@keyframes twinkle { 0%,100% {opacity:0.2;} 50% {opacity:1;} }
-@keyframes float { 0% {transform:translateY(0);} 50% {transform:translateY(-20px);} 100% {transform:translateY(0);} }
-#confetti { position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none; z-index:500;}
+
+#game {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.game-box {
+  max-width: 760px;
+  margin: auto;
+  background: rgba(255,255,255,0.92);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+}
+
+h1 {
+  margin: 8px 0;
+  font-size: clamp(26px, 6vw, 42px);
+  color: #6a1b9a;
+}
+
+.instruction {
+  font-size: clamp(16px, 4vw, 20px);
+  margin-bottom: 12px;
+}
+
+#card {
+  background: #fff8dc;
+  border: 4px solid #ffcc4d;
+  border-radius: 24px;
+  padding: 18px;
+  margin: 16px auto;
+  max-width: 340px;
+  min-height: 310px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#nounImage {
+  width: 180px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  display: none;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.icon-card {
+  width: 180px;
+  height: 160px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #d9faff, #ffffff);
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 76px;
+  margin-bottom: 12px;
+  animation: floatIcon 2s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+#nounWord {
+  font-size: clamp(28px, 8vw, 42px);
+  margin: 8px 0;
+  color: #1e3a8a;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+button {
+  border: none;
+  border-radius: 18px;
+  padding: 14px 20px;
+  font-size: clamp(16px, 4vw, 20px);
+  font-weight: bold;
+  cursor: pointer;
+  background: #ffd166;
+  box-shadow: 0 5px 0 #d89b00;
+  color: #222;
+}
+
+button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #d89b00;
+}
+
+.common-btn {
+  background: #8ecae6;
+  box-shadow: 0 5px 0 #3a86a8;
+}
+
+.proper-btn {
+  background: #cdb4db;
+  box-shadow: 0 5px 0 #8d6aa6;
+}
+
+#feedback {
+  min-height: 34px;
+  margin-top: 12px;
+  font-size: clamp(20px, 5vw, 26px);
+  font-weight: bold;
+}
+
+#score {
+  font-size: clamp(18px, 4vw, 22px);
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+#restart {
+  display: none;
+  margin-top: 14px;
+  background: #06d6a0;
+  box-shadow: 0 5px 0 #04966f;
+}
+
+#confetti {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 900;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  animation: pop 900ms ease-out forwards;
+}
+
+@keyframes pop {
+  0% {
+    opacity: 1;
+    transform: translate(0,0) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) scale(0.5) rotate(360deg);
+  }
+}
+
+.final-message {
+  font-size: 30px;
+  color: #6a1b9a;
+}
+
+@media (max-width: 480px) {
+  #card {
+    max-width: 96%;
+    min-height: 280px;
+    padding: 14px;
+  }
+
+  #nounImage,
+  .icon-card {
+    width: 150px;
+    height: 135px;
+  }
+
+  button {
+    width: 90%;
+  }
+}
 </style>
 </head>
+
 <body>
 
-<div id="splash"></div>
+<div id="splash">
+  <img src="assets/innovinelogo.png" alt="Innovine Logo">
+</div>
 
 <div id="game">
-<h1>🌟 Common vs Proper Nouns 🌟</h1>
-<p>Sort the noun into the correct category!</p>
+  <div class="game-box">
+    <h1>Common vs Proper Nouns</h1>
+    <p class="instruction">Look at the word and choose the correct noun type.</p>
 
-<div id="card">
-  <img id="nounImage" src="">
-  <h2 id="nounWord"></h2>
+    <div id="card">
+      <img id="nounImage" alt="Noun image">
+      <div id="iconCard" class="icon-card"></div>
+      <h2 id="nounWord"></h2>
+    </div>
+
+    <div class="buttons">
+      <button class="common-btn" onclick="checkAnswer('common')">Common Noun</button>
+      <button class="proper-btn" onclick="checkAnswer('proper')">Proper Noun</button>
+    </div>
+
+    <div id="feedback"></div>
+    <div id="score">Score: 0 / 0</div>
+    <button id="restart" onclick="restartGame()">Restart Game</button>
+  </div>
 </div>
 
-<div>
-<button onclick="check('common')">Common Noun</button>
-<button onclick="check('proper')">Proper Noun</button>
-</div>
-
-<div id="feedback"></div>
-<div id="score">Score: 0 / 0</div>
-<div id="restart" onclick="restartGame()">🔄 Restart Game</div>
 <div id="confetti"></div>
-</div>
 
-<audio id="correctAudio" src="correct.mp3"></audio>
-<audio id="wrongAudio" src="wrong.mp3"></audio>
-<audio id="clapAudio" src="clapping.mp3"></audio>
+<audio id="correctAudio" src="assets/correct.mp3"></audio>
+<audio id="wrongAudio" src="assets/wrong.mp3"></audio>
+<audio id="clapAudio" src="assets/clapping.mp3"></audio>
 
 <script>
-// Game items (vector-style placeholder images)
 const items = [
-  {word:'dog',type:'common',img:'https://via.placeholder.com/150?text=Dog'},
-  {word:'teacher',type:'common',img:'https://via.placeholder.com/150?text=Teacher'},
-  {word:'apple',type:'common',img:'https://via.placeholder.com/150?text=Apple'},
-  {word:'school',type:'common',img:'https://via.placeholder.com/150?text=School'},
-  {word:'book',type:'common',img:'https://via.placeholder.com/150?text=Book'},
-  {word:'pencil',type:'common',img:'https://via.placeholder.com/150?text=Pencil'},
-  {word:'Riya',type:'proper',img:'https://via.placeholder.com/150?text=Riya'},
-  {word:'India',type:'proper',img:'https://via.placeholder.com/150?text=India'},
-  {word:'Mumbai',type:'proper',img:'https://via.placeholder.com/150?text=Mumbai'},
-  {word:'Monday',type:'proper',img:'https://via.placeholder.com/150?text=Monday'},
-  {word:'Eiffel Tower',type:'proper',img:'https://via.placeholder.com/150?text=Eiffel+Tower'},
-  {word:'River Nile',type:'proper',img:'https://via.placeholder.com/150?text=River+Nile'},
-  {word:'Christmas',type:'proper',img:'https://via.placeholder.com/150?text=Christmas'},
-  {word:'Taj Mahal',type:'proper',img:'https://via.placeholder.com/150?text=Taj+Mahal'},
-  {word:'glass',type:'common',img:'https://via.placeholder.com/150?text=Glass'},
-  {word:'chair',type:'common',img:'https://via.placeholder.com/150?text=Chair'}
+  { word: "dog", type: "common", icon: "🐶" },
+  { word: "teacher", type: "common", icon: "👩‍🏫" },
+  { word: "apple", type: "common", icon: "🍎" },
+  { word: "school", type: "common", icon: "🏫" },
+  { word: "book", type: "common", icon: "📘" },
+  { word: "pencil", type: "common", icon: "✏️" },
+  { word: "glass", type: "common", icon: "🥛" },
+  { word: "chair", type: "common", icon: "🪑" },
+
+  { word: "Riya", type: "proper", icon: "👧" },
+  { word: "India", type: "proper", icon: "🇮🇳" },
+  { word: "Mumbai", type: "proper", icon: "🌆" },
+  { word: "Monday", type: "proper", icon: "📅" },
+  { word: "Eiffel Tower", type: "proper", icon: "🗼" },
+  { word: "River Nile", type: "proper", icon: "🏞️" },
+  { word: "Christmas", type: "proper", img: "assets/christmasfestival.jpg" },
+  { word: "A. P. J. Abdul Kalam", type: "proper", img: "assets/apjabdulkalam.jpg" }
 ];
 
+let gameItems = [];
 let currentIndex = 0;
 let score = 0;
+let canClick = true;
 
-// Splash
-setTimeout(()=>{
-  document.getElementById('splash').style.display='none';
-  document.getElementById('game').style.display='block';
-  shuffle(items);
-  showNext();
-},5000);
+const splash = document.getElementById("splash");
+const game = document.getElementById("game");
+const nounImage = document.getElementById("nounImage");
+const iconCard = document.getElementById("iconCard");
+const nounWord = document.getElementById("nounWord");
+const feedback = document.getElementById("feedback");
+const scoreBox = document.getElementById("score");
+const restartBtn = document.getElementById("restart");
+const correctAudio = document.getElementById("correctAudio");
+const wrongAudio = document.getElementById("wrongAudio");
+const clapAudio = document.getElementById("clapAudio");
 
-// Stars background
-for(let i=0;i<100;i++){
-  const s=document.createElement('div');
-  s.className='star';
-  s.style.top=Math.random()*100+'%';
-  s.style.left=Math.random()*100+'%';
-  s.style.width=1+Math.random()*3+'px';
-  s.style.height=1+Math.random()*3+'px';
-  s.style.animationDuration=(2+Math.random()*3)+'s';
-  document.body.appendChild(s);
+setTimeout(function() {
+  splash.style.display = "none";
+  game.style.display = "block";
+  startGame();
+}, 5000);
+
+function startGame() {
+  gameItems = shuffleArray([...items]);
+  currentIndex = 0;
+  score = 0;
+  restartBtn.style.display = "none";
+  showQuestion();
 }
 
-// Shuffle array
-function shuffle(array){for(let i=array.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
+}
 
-// Show next item
-function showNext(){
-  if(currentIndex>=items.length){
-    document.getElementById('nounWord').innerText='🎉 Finished!';
-    document.getElementById('nounImage').style.display='none';
-    document.getElementById('feedback').innerText='';
-    document.getElementById('restart').style.display='inline-block';
-    document.getElementById('clapAudio').play();
+function showQuestion() {
+  canClick = true;
+
+  if (currentIndex >= gameItems.length) {
+    endGame();
     return;
   }
-  const current = items[currentIndex];
-  document.getElementById('nounImage').src=current.img;
-  document.getElementById('nounImage').style.display='block';
-  document.getElementById('nounWord').innerText=current.word;
-  document.getElementById('feedback').innerText='';
-  document.getElementById('score').innerText = `Score: ${score} / ${items.length}`;
+
+  const current = gameItems[currentIndex];
+
+  nounWord.textContent = current.word;
+  feedback.textContent = "";
+  scoreBox.textContent = "Score: " + score + " / " + gameItems.length;
+
+  if (current.img) {
+    nounImage.src = current.img;
+    nounImage.style.display = "block";
+    iconCard.style.display = "none";
+  } else {
+    nounImage.style.display = "none";
+    iconCard.style.display = "flex";
+    iconCard.textContent = current.icon;
+  }
 }
 
-// Check answer
-function check(type){
-  const current = items[currentIndex];
-  if(type===current.type){
+function checkAnswer(answer) {
+  if (!canClick) return;
+  canClick = false;
+
+  const current = gameItems[currentIndex];
+
+  if (answer === current.type) {
     score++;
-    document.getElementById('feedback').innerText='✅ Correct!';
-    document.getElementById('correctAudio').play();
-    celebrate();
-  }else{
-    document.getElementById('feedback').innerText='❌ Wrong!';
-    document.getElementById('wrongAudio').play();
+    feedback.textContent = "Correct!";
+    safePlay(correctAudio);
+    createConfetti();
+  } else {
+    feedback.textContent = "Try again next time!";
+    safePlay(wrongAudio);
   }
+
   currentIndex++;
-  setTimeout(showNext,900);
+
+  setTimeout(function() {
+    showQuestion();
+  }, 900);
 }
 
-// Confetti celebration
-function celebrate(){
-  const container=document.getElementById('confetti');
-  for(let i=0;i<50;i++){
-    const c=document.createElement('div');
-    c.style.position='absolute';
-    c.style.width='6px';
-    c.style.height='6px';
-    c.style.background='yellow';
-    c.style.top='50%';
-    c.style.left='50%';
-    c.style.borderRadius='50%';
-    c.style.opacity=1;
-    c.style.transform=`translate(${Math.random()*400-200}px, ${Math.random()*400-200}px)`;
-    c.style.transition='all 1s ease-out';
-    container.appendChild(c);
-    setTimeout(()=>{c.remove();},1000);
+function endGame() {
+  nounImage.style.display = "none";
+  iconCard.style.display = "flex";
+  iconCard.textContent = "🎉";
+  nounWord.innerHTML = "<span class='final-message'>Finished!</span>";
+  feedback.textContent = "Great work!";
+  scoreBox.textContent = "Final Score: " + score + " / " + gameItems.length;
+  restartBtn.style.display = "inline-block";
+  safePlay(clapAudio);
+}
+
+function restartGame() {
+  startGame();
+}
+
+function safePlay(audio) {
+  audio.currentTime = 0;
+  audio.play().catch(function() {});
+}
+
+function createConfetti() {
+  const confetti = document.getElementById("confetti");
+  const colors = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93"];
+
+  for (let i = 0; i < 35; i++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    piece.style.left = "50%";
+    piece.style.top = "50%";
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.setProperty("--x", (Math.random() * 500 - 250) + "px");
+    piece.style.setProperty("--y", (Math.random() * 400 - 250) + "px");
+    confetti.appendChild(piece);
+
+    setTimeout(function() {
+      piece.remove();
+    }, 950);
   }
-}
-
-// Restart
-function restartGame(){
-  currentIndex=0;
-  score=0;
-  shuffle(items);
-  document.getElementById('nounImage').style.display='block';
-  document.getElementById('restart').style.display='none';
-  showNext();
 }
 </script>
 
